@@ -33,42 +33,6 @@ raw_data <- read_csv("HW2_Data.csv") %>%
 ```
 
 ```{r}
-
-# Check relationship between data
-# Linear appears appropriate for a & b
-
-#  raw_data_02 <- raw_data %>% 
-#    pivot_longer("mc_a":"mc_d", 
-#                names_to = "sector", 
-#                  values_to = "mc")
-#  
-#  ggplot(data = raw_data_02, aes(sample = mc))+
-#   geom_qq()+
-#    geom_qq_line()+
-#    facet_wrap(~sector)
-# 
-# # Plot estimated marginal abatement costs
-# 
-#  ggplot(data = raw_data_02, aes(x = abatement, y = mc))+
-#    geom_line()+
-#    geom_point()+
-#    stat_smooth(method = "lm",
-#                se = FALSE,
-#                formula=y ~ poly(x, 2, raw=TRUE))+
-#    facet_wrap(~sector,
-#              scale = "free")
-# 
-#  ggplot(data = raw_data_02, aes(x = abatement, y = mc))+
-#    geom_line()+
-#    geom_point()+
-#    geom_smooth(method = "lm",
-#                se = FALSE)+
-#    facet_wrap(~sector,
-#               scale = "free")
-
-```
-
-```{r}
 # Create function to estimate abatement costs
 
 a_lm <- lm(mc_a ~ abatement, data = raw_data)
@@ -76,13 +40,6 @@ b_lm <- lm(mc_b ~ abatement, data = raw_data)
 c_lm <- lm(mc_c ~ abatement, data = raw_data)
 d_lm <- lm(mc_d ~ abatement, data = raw_data)
 summary(d_lm)
-
-# b_lm_02 <- lm(mc_b ~ poly(abatement, 2, raw = TRUE), data = raw_data)
-# b_nls <- nls(mc_b ~ K/(1 + A*exp(-r*abatement)), data = raw_data, 
-# start = list(K = 60, A = 50, r = 0.39), trace = TRUE)
-# b_lm <- lm(mc_b ~ poly(abatement, 2, raw = TRUE), data = raw_data)
-# c_lm <- lm(mc_c ~ poly(abatement, 2, raw = TRUE), data = raw_data)
-# d_lm <- lm(mc_d ~ poly(abatement, 2, raw = TRUE), data = raw_data)
 
 ```
 
@@ -125,19 +82,6 @@ d_quant <- function(p) {q = 300 - ((p-d_y)/d_1)}
 agg_quant <- function(p) {q =  600 - ((p-a_y)/a_1) - ((p-b_y)/b_1) - ((p-c_y)/c_1)}
 agg_quant_all <- function(p) {q =  900 - ((p-a_y)/a_1) - ((p-b_y)/b_1) - ((p-c_y)/c_1) - ((p-d_y)/d_1)}
 
-# x_demand <- function(q) {y = 600 - ((q-a_y)/a_1) - ((q-b_y)/b_1) - ((q-c_y)/c_1)}
-# b_eq_huh <- function(x) {y = (58.18640)/(1+10.56466*exp(-0.04849*x))}
-# b_eq_quad <- function(x) {y = -2.008211 + 0.854358*(x) + -0.003084*(x)^2}
-# c_eq <- function(x) {y = 0.321580*(x) + 0.005390*(x^2) - 7.941422}
-# d_eq <- function(x) {y = 2.098529 - 0.059765*x + 0.004088*x^2}
-# c_eq <- function(x) {y = 1.563e-02*x^2 -2.735e-01*x - 4.553e-05*x^3 - 1.726e+00}
-# a_eq_demand <- function(q) {y = 1.663 + 0.513*(170) - 0.513*(q)}
-# b_eq_demand <- function(q) {y = y = 8.78529 + 0.39178*(200) - 0.39178*(q)}
-# b_eq_demand <- function(q) {y = 8.7853 + 0.3918*(200) - 0.3918*(q)}
-# c_eq_demand <- function(q) {y = 0.321580*(230 - q) + 0.005390*(230 - q)*(230 - q) - 7.941422}
-# d_eq_demand <- function(q) {y = 2.098529 - 0.059765*(300 - q) + 0.004088*(300 - q)^2}
-# a_demand_01 <- function(q) {y = 170 - ((q-a_y)/a_1)}
-
 ```
 
 3. Analysis of Country X Policies
@@ -167,24 +111,9 @@ cost_c <- (0.5)*(100-abat_quant_c)*(abat_price_c)
 cost_total <- sum(cost_a, cost_b, cost_c)
 tax_revenue_cap <- 0
 
-# Now, graph this ish
-ggplot() +
-  stat_function(aes(z), color = "darkred", fun = a_eq, size = 1, show.legend = FALSE)+
-  stat_function(aes(z), color = "darkblue", fun = b_eq, size = 1, show.legend = FALSE)+
-  stat_function(aes(z), color = "darkorange", fun = c_eq, size = 1, show.legend = FALSE)+
-  # stat_function(aes(z), color = "darkgreen", fun = d_eq, size = 1, show.legend = FALSE)+
-  scale_y_continuous(limits = c(0, 300),
-                     expand = c(0, 0))+
-  scale_x_continuous(limits = c(0, 250),
-                     expand = c(0, 0))+
-  labs(x = "Abatement (Metric Tons)", 
-       y = "Price (USD / Metric Ton)",
-       title = "Marginal Abatement Cost")+
-  theme_classic()
-
 ```
 
-a. Tax on Carbon
+b. Tax on Carbon
   - (1) Total cost of meeting the target in country X
   - (2) The cost (or benefit) to each sector
   - (3) The tax revenue generated from policy
@@ -214,25 +143,9 @@ tax_cost_b <- tax_quant_b*tax_price
 tax_cost_c <- tax_quant_c*tax_price
 tax_revenue_tax <- sum(tax_cost_a, tax_cost_b, tax_cost_c)
 
-# Now, graph this ish (... figure out aggregate demand)
-ggplot()+
-  stat_function(aes(za), color = "darkred", fun = a_price, size = 1, show.legend = FALSE)+
-  stat_function(aes(za), color = "darkblue", fun = b_price, size = 1, show.legend = FALSE)+
-  stat_function(aes(za), color = "darkorange", fun = c_price, size = 1, show.legend = FALSE)+
-  # stat_function(aes(za), color = "darkgreen", fun = d_demand, size = 1, show.legend = FALSE)+
-  # stat_function(aes(za, coord_flip = TRUE), color = "black", fun = agg_quant, size = 1, show.legend = FALSE)+
-  scale_y_continuous(limits = c(0, 300),
-                     expand = c(0, 0))+
-  scale_x_continuous(limits = c(0, 250),
-                     expand = c(0, 0))+
-  labs(x = "Pollution (Metric Tons)",
-       y = "Price (USD / Metric Ton)",
-       title = "Demand for Pollution")+
-  theme_classic()
-
 ```
 
-a. Cap & Trade
+b. Cap & Trade
   - (1) Total cost of meeting the target in country X
   - (2) The cost (or benefit) to each sector
   - (3) The tax revenue generated from policy
@@ -247,31 +160,26 @@ ct_quant_a <- tax_quant_a
 ct_quant_b <- tax_quant_b
 ct_quant_c <- tax_quant_c
 
+# Calculate required reductions due to cap
+cap_abat_a <- 170 - 100
+cap_abat_b <- 200 - 100
+cap_abat_c <- 230 - 100
+
 # Calculate required abatement to achieve these units produced
 ct_abat_a <- 170 - ct_quant_a
 ct_abat_b <- 200 - ct_quant_b
 ct_abat_c <- 230 - ct_quant_c
+
+# Result of trade
+ct_trade_a <- cap_abat_a - ct_abat_a
+ct_trade_b <- cap_abat_b - ct_abat_b
+ct_trade_c <- cap_abat_c - ct_abat_c
 
 # Calculate cost of abatement at nth unit - costs would be split more equitably than this because of trading. do that ish later. 
 ct_cost_a <- (0.5)*(ct_abat_a)*(abat_price_a-a_y) + (a_y*ct_abat_a)
 ct_cost_b <- (0.5)*(ct_abat_b)*(abat_price_b-b_y) + (b_y*ct_abat_b)
 ct_cost_c <- (0.5)*(ct_abat_c-abat_quant_c)*(abat_price_c)
 ct_cost_total <- sum(ct_cost_a, ct_cost_b, ct_cost_c)
-
-# Now, graph this ish. 
-ggplot() +
-  stat_function(aes(z), color = "darkred", fun = a_eq, size = 1, show.legend = FALSE)+
-  stat_function(aes(z), color = "darkblue", fun = b_eq, size = 1, show.legend = FALSE)+
-  stat_function(aes(z), color = "darkorange", fun = c_eq, size = 1, show.legend = FALSE)+
-  # stat_function(aes(z), color = "darkgreen", fun = d_eq, size = 1, show.legend = FALSE)+
-  scale_y_continuous(limits = c(0, 300),
-                     expand = c(0, 0))+
-  scale_x_continuous(limits = c(0, 250),
-                     expand = c(0, 0))+
-  labs(x = "Abatement (Metric Tons)", 
-       y = "Price (USD / Metric Ton)",
-       title = "Marginal Abatement Cost")+
-  theme_classic()
 
 ```
 
@@ -294,6 +202,12 @@ y_abat_b <- 200 - y_quant_b
 y_abat_c <- 230 - y_quant_c
 y_abat_d <- 300 - y_quant_d
 
+# Calculate results of trade
+y_trade_a <- y_quant_a - cap_abat_a
+y_trade_b <- y_quant_b - cap_abat_b
+y_trade_c <- y_quant_c - cap_abat_c
+y_trade_d <- y_quant_d - 300
+
 #Calculate required abatement costs by sector
 y_cost_a <- (0.5)*(y_abat_a)*(price_600_y-a_y) + (a_y*y_abat_a)
 y_cost_b <- (0.5)*(y_abat_b)*(price_600_y-b_y) + (b_y*y_abat_b)
@@ -301,23 +215,42 @@ y_cost_c <- (0.5)*(y_abat_c-abat_quant_c)*(price_600_y)
 y_cost_d <- (0.5)*(y_abat_d)*(price_600_y-d_y) + (d_y*y_abat_d)
 y_cost_total <- sum(y_cost_a, y_cost_b, y_cost_c, y_cost_d)
 
+```
+
+```{r}
+
+# Plots for appendix
+
+# Plot marginal abatement 
 ggplot() +
   stat_function(aes(z), color = "darkred", fun = a_eq, size = 1, show.legend = FALSE)+
   stat_function(aes(z), color = "darkblue", fun = b_eq, size = 1, show.legend = FALSE)+
   stat_function(aes(z), color = "darkorange", fun = c_eq, size = 1, show.legend = FALSE)+
   stat_function(aes(z), color = "darkgreen", fun = d_eq, size = 1, show.legend = FALSE)+
-  scale_y_continuous(limits = c(0, 300),
+  scale_y_continuous(limits = c(0, 200),
                      expand = c(0, 0))+
-  scale_x_continuous(limits = c(0, 250),
+  scale_x_continuous(limits = c(0, 200),
                      expand = c(0, 0))+
   labs(x = "Abatement (Metric Tons)", 
        y = "Price (USD / Metric Ton)",
        title = "Marginal Abatement Cost")+
   theme_classic()
 
-```
-
-```{r}
+# Plot demand for pollution
+ggplot()+
+  stat_function(aes(za), color = "darkred", fun = a_price, size = 1, show.legend = FALSE)+
+  stat_function(aes(za), color = "darkblue", fun = b_price, size = 1, show.legend = FALSE)+
+  stat_function(aes(za), color = "darkorange", fun = c_price, size = 1, show.legend = FALSE)+
+  stat_function(aes(za), color = "darkgreen", fun = d_price, size = 1, show.legend = FALSE)+
+  # stat_function(aes(za, coord_flip = TRUE), color = "black", fun = agg_price, size = 1, show.legend = FALSE)+
+  scale_y_continuous(limits = c(0, 300),
+                     expand = c(0, 0))+
+  scale_x_continuous(limits = c(0, 300),
+                     expand = c(0, 0))+
+  labs(x = "Pollution (Metric Tons)",
+       y = "Price (USD / Metric Ton)",
+       title = "Demand for Pollution")+
+  theme_classic()
 
 ```
 
@@ -355,6 +288,59 @@ ggplot()+
        title = "Demand for Pollution")+
   theme_classic()
 
+# Regression Analysis
+
+# b_lm_02 <- lm(mc_b ~ poly(abatement, 2, raw = TRUE), data = raw_data)
+# b_nls <- nls(mc_b ~ K/(1 + A*exp(-r*abatement)), data = raw_data, 
+# start = list(K = 60, A = 50, r = 0.39), trace = TRUE)
+# b_lm <- lm(mc_b ~ poly(abatement, 2, raw = TRUE), data = raw_data)
+# c_lm <- lm(mc_c ~ poly(abatement, 2, raw = TRUE), data = raw_data)
+# d_lm <- lm(mc_d ~ poly(abatement, 2, raw = TRUE), data = raw_data)
+
+
+# Some ggs
+  # ggplot(data = raw_data_02, aes(x = abatement, y = mc))+
+  #   geom_line()+
+  #   geom_point()+
+  #   stat_smooth(method = "lm",
+  #               se = FALSE,
+  #               formula=y ~ poly(x, 2, raw=TRUE))+
+  #   facet_wrap(~sector,
+  #             scale = "free")
+
+# Marginal cost equations
+
+# x_demand <- function(q) {y = 600 - ((q-a_y)/a_1) - ((q-b_y)/b_1) - ((q-c_y)/c_1)}
+# b_eq_huh <- function(x) {y = (58.18640)/(1+10.56466*exp(-0.04849*x))}
+# b_eq_quad <- function(x) {y = -2.008211 + 0.854358*(x) + -0.003084*(x)^2}
+# c_eq <- function(x) {y = 0.321580*(x) + 0.005390*(x^2) - 7.941422}
+# d_eq <- function(x) {y = 2.098529 - 0.059765*x + 0.004088*x^2}
+# c_eq <- function(x) {y = 1.563e-02*x^2 -2.735e-01*x - 4.553e-05*x^3 - 1.726e+00}
+# a_eq_demand <- function(q) {y = 1.663 + 0.513*(170) - 0.513*(q)}
+# b_eq_demand <- function(q) {y = y = 8.78529 + 0.39178*(200) - 0.39178*(q)}
+# b_eq_demand <- function(q) {y = 8.7853 + 0.3918*(200) - 0.3918*(q)}
+# c_eq_demand <- function(q) {y = 0.321580*(230 - q) + 0.005390*(230 - q)*(230 - q) - 7.941422}
+# d_eq_demand <- function(q) {y = 2.098529 - 0.059765*(300 - q) + 0.004088*(300 - q)^2}
+# a_demand_01 <- function(q) {y = 170 - ((q-a_y)/a_1)}
+
+# # Plot the OG data
+# 
+# # Modify data frame for graph
+# 
+# raw_data_02 <- raw_data %>%
+#   pivot_longer("mc_a":"mc_d",
+#   names_to = "sector",
+#   values_to = "mc")
+# 
+# # Plot estimated marginal abatement costs
+# 
+# ggplot(data = raw_data_02, aes(x = abatement, y = mc))+
+#   geom_line()+
+#   geom_point()+
+#   geom_smooth(method = "lm",
+#               se = TRUE)+
+#   facet_wrap(~sector,
+#               scale = "free")
 
 ```
 

@@ -181,6 +181,11 @@ ct_cost_b <- (0.5)*(ct_abat_b)*(abat_price_b-b_y) + (b_y*ct_abat_b)
 ct_cost_c <- (0.5)*(ct_abat_c-abat_quant_c)*(abat_price_c)
 ct_cost_total <- sum(ct_cost_a, ct_cost_b, ct_cost_c)
 
+# Net result of trade
+ct_net_a <- ct_cost_a + ct_trade_a*price_300
+ct_net_b <- ct_cost_b + ct_trade_b*price_300
+ct_net_c <- ct_cost_c + ct_trade_c*price_300
+
 ```
 
 Question 4 - To country Y, or not to country Y, that is the question
@@ -215,6 +220,12 @@ y_cost_c <- (0.5)*(y_abat_c-abat_quant_c)*(price_600_y)
 y_cost_d <- (0.5)*(y_abat_d)*(price_600_y-d_y) + (d_y*y_abat_d)
 y_cost_total <- sum(y_cost_a, y_cost_b, y_cost_c, y_cost_d)
 
+# Calculate net cost post trading
+y_net_a <- y_cost_a + y_trade_a*price_600_y
+y_net_b <- y_cost_b + y_trade_b*price_600_y
+y_net_c <- y_cost_c + y_trade_c*price_600_y
+y_net_d <- y_cost_d + y_trade_d*price_600_y
+y_net_cost <- sum(y_net_a, y_net_b, y_net_c)
 ```
 
 ```{r}

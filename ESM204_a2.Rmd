@@ -75,7 +75,7 @@ a_lm <- lm(mc_a ~ abatement, data = raw_data)
 b_lm <- lm(mc_b ~ abatement, data = raw_data)
 c_lm <- lm(mc_c ~ abatement, data = raw_data)
 d_lm <- lm(mc_d ~ abatement, data = raw_data)
-summary(a_lm)
+summary(d_lm)
 
 # b_lm_02 <- lm(mc_b ~ poly(abatement, 2, raw = TRUE), data = raw_data)
 # b_nls <- nls(mc_b ~ K/(1 + A*exp(-r*abatement)), data = raw_data, 
@@ -121,7 +121,9 @@ za <- 0:250
 a_quant <- function(p) {q = 170 - ((p-a_y)/a_1)}
 b_quant <- function(p) {q = 200 - ((p-b_y)/b_1)}
 c_quant <- function(p) {q = 230 - ((p-c_y)/c_1)}
+d_quant <- function(p) {q = 300 - ((p-d_y)/d_1)}
 agg_quant <- function(p) {q =  600 - ((p-a_y)/a_1) - ((p-b_y)/b_1) - ((p-c_y)/c_1)}
+agg_quant_all <- function(p) {q =  900 - ((p-a_y)/a_1) - ((p-b_y)/b_1) - ((p-c_y)/c_1) - ((p-d_y)/d_1)}
 
 # x_demand <- function(q) {y = 600 - ((q-a_y)/a_1) - ((q-b_y)/b_1) - ((q-c_y)/c_1)}
 # b_eq_huh <- function(x) {y = (58.18640)/(1+10.56466*exp(-0.04849*x))}
@@ -214,9 +216,9 @@ tax_revenue_tax <- sum(tax_cost_a, tax_cost_b, tax_cost_c)
 
 # Now, graph this ish (... figure out aggregate demand)
 ggplot()+
-  stat_function(aes(za), color = "darkred", fun = a_demand, size = 1, show.legend = FALSE)+
-  stat_function(aes(za), color = "darkblue", fun = b_demand, size = 1, show.legend = FALSE)+
-  stat_function(aes(za), color = "darkorange", fun = c_demand, size = 1, show.legend = FALSE)+
+  stat_function(aes(za), color = "darkred", fun = a_price, size = 1, show.legend = FALSE)+
+  stat_function(aes(za), color = "darkblue", fun = b_price, size = 1, show.legend = FALSE)+
+  stat_function(aes(za), color = "darkorange", fun = c_price, size = 1, show.legend = FALSE)+
   # stat_function(aes(za), color = "darkgreen", fun = d_demand, size = 1, show.legend = FALSE)+
   # stat_function(aes(za, coord_flip = TRUE), color = "black", fun = agg_quant, size = 1, show.legend = FALSE)+
   scale_y_continuous(limits = c(0, 300),
@@ -237,28 +239,26 @@ a. Cap & Trade
 
 ```{r}
 
-ggplot()+
-  stat_function(aes(za), color = "darkred", fun = a_demand, size = 1, show.legend = FALSE)+
-  stat_function(aes(za), color = "darkblue", fun = b_demand, size = 1, show.legend = FALSE)+
-  stat_function(aes(za), color = "darkorange", fun = c_demand, size = 1, show.legend = FALSE)+
-  # stat_function(aes(za), color = "darkgreen", fun = d_demand, size = 1, show.legend = FALSE)+
-  # stat_function(aes(za, coord_flip = TRUE), color = "black", fun = agg_quant, size = 1, show.legend = FALSE)+
-  scale_y_continuous(limits = c(0, 300),
-                     expand = c(0, 0))+
-  scale_x_continuous(limits = c(0, 250),
-                     expand = c(0, 0))+
-  labs(x = "Pollution (Metric Tons)",
-       y = "Price (USD / Metric Ton)",
-       title = "Demand for Pollution")+
-  theme_classic()
+# Units produced per sector found at price where agg demand curve = 300 units. See "price_300" above. 
+# optimal units same as tax_quant for each sector. Cost comes in form of abatement, however, not tax cost. 
 
-```
+# Calculate units produced at optimal quantity
+ct_quant_a <- tax_quant_a
+ct_quant_b <- tax_quant_b
+ct_quant_c <- tax_quant_c
 
+# Calculate required abatement to achieve these units produced
+ct_abat_a <- 170 - ct_quant_a
+ct_abat_b <- 200 - ct_quant_b
+ct_abat_c <- 230 - ct_quant_c
 
-```{r, out.width = c('50%', '50%'), fig.show = 'hold'}
+# Calculate cost of abatement at nth unit - costs would be split more equitably than this because of trading. do that ish later. 
+ct_cost_a <- (0.5)*(ct_abat_a)*(abat_price_a-a_y) + (a_y*ct_abat_a)
+ct_cost_b <- (0.5)*(ct_abat_b)*(abat_price_b-b_y) + (b_y*ct_abat_b)
+ct_cost_c <- (0.5)*(ct_abat_c-abat_quant_c)*(abat_price_c)
+ct_cost_total <- sum(ct_cost_a, ct_cost_b, ct_cost_c)
 
-# Use functions to graph marginal abatement cost curve
-
+# Now, graph this ish. 
 ggplot() +
   stat_function(aes(z), color = "darkred", fun = a_eq, size = 1, show.legend = FALSE)+
   stat_function(aes(z), color = "darkblue", fun = b_eq, size = 1, show.legend = FALSE)+
@@ -272,6 +272,58 @@ ggplot() +
        y = "Price (USD / Metric Ton)",
        title = "Marginal Abatement Cost")+
   theme_classic()
+
+```
+
+Question 4 - To country Y, or not to country Y, that is the question
+
+```{r, out.width = c('50%', '50%'), fig.show = 'hold'}
+
+# Use aggregate demand (all sectors) function to determine price at 900 and 600 units (300 country x +300 country y)
+price_600_y <- 38.9080483484851
+
+# Optimal production quantities with merged market (countries x & y)
+y_quant_a <- a_quant(price_600_y)
+y_quant_b <- b_quant(price_600_y)
+y_quant_c <- c_quant(price_600_y)
+y_quant_d <- d_quant(price_600_y)
+
+# Calculate required abatement amounts by sector 
+y_abat_a <- 170 - y_quant_a
+y_abat_b <- 200 - y_quant_b
+y_abat_c <- 230 - y_quant_c
+y_abat_d <- 300 - y_quant_d
+
+#Calculate required abatement costs by sector
+y_cost_a <- (0.5)*(y_abat_a)*(price_600_y-a_y) + (a_y*y_abat_a)
+y_cost_b <- (0.5)*(y_abat_b)*(price_600_y-b_y) + (b_y*y_abat_b)
+y_cost_c <- (0.5)*(y_abat_c-abat_quant_c)*(price_600_y)
+y_cost_d <- (0.5)*(y_abat_d)*(price_600_y-d_y) + (d_y*y_abat_d)
+y_cost_total <- sum(y_cost_a, y_cost_b, y_cost_c, y_cost_d)
+
+ggplot() +
+  stat_function(aes(z), color = "darkred", fun = a_eq, size = 1, show.legend = FALSE)+
+  stat_function(aes(z), color = "darkblue", fun = b_eq, size = 1, show.legend = FALSE)+
+  stat_function(aes(z), color = "darkorange", fun = c_eq, size = 1, show.legend = FALSE)+
+  stat_function(aes(z), color = "darkgreen", fun = d_eq, size = 1, show.legend = FALSE)+
+  scale_y_continuous(limits = c(0, 300),
+                     expand = c(0, 0))+
+  scale_x_continuous(limits = c(0, 250),
+                     expand = c(0, 0))+
+  labs(x = "Abatement (Metric Tons)", 
+       y = "Price (USD / Metric Ton)",
+       title = "Marginal Abatement Cost")+
+  theme_classic()
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+# Hello there, beautiful code that no longer is relevant
 
 ggplot()+
   stat_function(aes(za), color = "darkred", fun = a_demand, size = 1, show.legend = FALSE)+
@@ -303,15 +355,6 @@ ggplot()+
        title = "Demand for Pollution")+
   theme_classic()
 
-```
-
-```{r}
-
-```
-
-```{r}
-
-# Hello there, beautiful code that no longer is relevant
 
 ```
 

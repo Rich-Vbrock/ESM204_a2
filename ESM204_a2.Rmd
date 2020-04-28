@@ -113,8 +113,6 @@ cost_c <- (0.5)*(100-abat_quant_c)*(abat_price_c) + under_curve_c
 cost_total <- sum(cost_a, cost_b, cost_c)
 tax_revenue_cap <- 0
 
-integrate()
-
 ```
 
 b. Tax on Carbon
@@ -211,10 +209,15 @@ ct_trade_a <- cap_abat_a - ct_abat_a
 ct_trade_b <- cap_abat_b - ct_abat_b
 ct_trade_c <- cap_abat_c - ct_abat_c
 
+# Abatement quanttities
+abat_ct_a <- a_eq(ct_abat_a)
+abat_ct_b <- b_eq(ct_abat_b)
+abat_ct_c <- c_eq(ct_abat_c)
+
 # Calculate cost of abatement at nth unit - costs would be split more equitably than this because of trading. do that ish later. 
-ct_cost_a <- (0.5)*(ct_abat_a)*(abat_price_a-a_y) + (a_y*ct_abat_a)
-ct_cost_b <- (0.5)*(ct_abat_b)*(abat_price_b-b_y) + (b_y*ct_abat_b)
-ct_cost_c <- (0.5)*(ct_abat_c-abat_quant_c)*(abat_price_c)+ under_curve_c
+ct_cost_a <- (0.5)*(ct_abat_a)*(abat_ct_a-a_y) + (a_y*abat_ct_a)
+ct_cost_b <- (0.5)*(ct_abat_b)*(abat_ct_b-b_y) + (b_y*abat_ct_b)
+ct_cost_c <- (0.5)*(ct_abat_c-abat_quant_c)*(abat_ct_c) + under_curve_c
 ct_cost_total <- sum(ct_cost_a, ct_cost_b, ct_cost_c) 
 
 # Net result of trade
@@ -256,7 +259,12 @@ y_trade_d <- 300 - y_quant_d
 d_eq_69 <- function(p) {(q = p-d_y)/d_1}
 abat_quant_d <- d_eq_69(0)
 stupid_shit <- d_eq(0)
-  
+
+#price at abatement
+y_pa <- a_eq(y_abat_a)
+y_pb <- b_eq(y_abat_b)
+y_pc <- c_eq(y_abat_c)
+y_pd <- d_eq(y_abat_d)
 
 #Calculate required abatement costs by sector
 y_cost_a <- (0.5)*(y_abat_a)*(price_600_y-a_y) + (a_y*y_abat_a)
@@ -271,6 +279,25 @@ y_net_b <- y_cost_b + y_trade_b*price_600_y
 y_net_c <- y_cost_c + y_trade_c*price_600_y
 y_net_d <- y_cost_d + y_trade_d*price_600_y
 y_net_cost <- sum(y_net_a, y_net_b, y_net_c, y_net_d)
+
+ggplot() +
+  stat_function(aes(z, color = "Sector A"), fun = a_eq, size = 1, show.legend = TRUE)+
+  stat_function(aes(z, color = "Sector B"), fun = b_eq, size = 1, show.legend = TRUE)+
+  stat_function(aes(z, color = "Sector C"), fun = c_eq, size = 1, show.legend = TRUE)+
+  # stat_function(aes(z, color = "Sector D"), fun = d_eq, size = 1, show.legend = TRUE)+
+  scale_y_continuous(limits = c(0, 200),
+                     expand = c(0, 0))+
+  scale_x_continuous(limits = c(0, 200),
+                     expand = c(0, 0))+
+  scale_color_manual(values = c("darkred", "darkblue", "darkorange", "darkgreen"))+
+  labs(x = "Abatement (Metric Tons)", 
+       y = "Price (USD / Metric Ton)",
+       title = "Figure 1: Marginal Abatement Cost",
+       color = "Sector")+
+  theme_classic()+
+  theme(legend.position = c(0.20, 0.95),
+        legend.justification = c("right", "top"),
+        legend.background = element_rect(fill = "gray85"))
 ```
 
 ```{r, out.width = c("50%", "50%"), fig.show = "hold"}
@@ -282,7 +309,7 @@ ggplot() +
   stat_function(aes(z, color = "Sector A"), fun = a_eq, size = 1, show.legend = TRUE)+
   stat_function(aes(z, color = "Sector B"), fun = b_eq, size = 1, show.legend = TRUE)+
   stat_function(aes(z, color = "Sector C"), fun = c_eq, size = 1, show.legend = TRUE)+
-  # stat_function(aes(z, color = "Sector D"), fun = d_eq, size = 1, show.legend = TRUE)+
+  stat_function(aes(z, color = "Sector D"), fun = d_eq, size = 1, show.legend = TRUE)+
   scale_y_continuous(limits = c(0, 200),
                      expand = c(0, 0))+
   scale_x_continuous(limits = c(0, 200),
